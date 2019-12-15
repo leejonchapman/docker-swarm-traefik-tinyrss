@@ -1,0 +1,52 @@
+version: "3.5"
+services:
+  servicerss:
+    image: wangqiru/ttrss:latest
+    container_name: ttrss
+    networks:
+      - internal_routeable
+    environment:
+      - SELF_URL_PATH=https://tinyrss.leejonchapman.cm/ # please change to your own domain
+      - DB_HOST=#######
+      - DB_PORT=5432
+      - DB_NAME=######
+      - DB_USER=######
+      - DB_PASS=#######
+      - ENABLE_PLUGINS=auth_internal,fever # auth_internal is required. Plugins enabled here will be enabled for all users as system plugins
+    stdin_open: true
+    tty: true
+    restart: always
+    command: sh -c 'sh /wait-for.sh $$DB_HOST:$$DB_PORT -- php /configure-db.php && exec s6-svscan /etc/s6/'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:tinyrss.leejonchapman.com"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.frontend.headers.SSLRedirect=true"
+
+  servicemercury: # set Mercury Parser API endpoint to `servicemercury:3000` on TTRSS plugin setting page
+    image: wangqiru/mercury-parser-api:latest
+    container_name: mercury
+    expose:
+      - 3000
+    restart: always
+  serivceopencc: # set OpenCC API endpoint to `serivceopencc:3000` on TTRSS plugin setting page
+    image: wangqiru/opencc-api-server:latest
+    container_name: opencc
+    environment:
+      - NODE_ENV=production
+  # expose:
+  #   - 3000
+    restart: always
+  # utility.watchtower:
+  #   container_name: watchtower
+  #   image: containrrr/watchtower:latest
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - WATCHTOWER_CLEANUP=true
+  #     - WATCHTOWER_POLL_INTERVAL=86400
+  #   restart: always
+networks:
+  internal_routeable:
+    name: internal_routeable
+    external: true
