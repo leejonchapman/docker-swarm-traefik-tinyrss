@@ -28,6 +28,9 @@ services:
         constraints:
           - node.role == worker
       mode: global
+      restart_policy:
+        condition: any
+        max_attempts: 3
  ###
  ###
  ###     
@@ -43,6 +46,9 @@ services:
         constraints:
           - node.role == worker
       mode: global
+      restart_policy:
+        condition: any
+        max_attempts: 3
 ###
 ###
 ###
