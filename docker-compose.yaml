@@ -58,6 +58,9 @@ services:
         constraints:
           - node.role == worker
       mode: global
+      restart_policy:
+        condition: any
+        max_attempts: 3
   # utility.watchtower:
   #   container_name: watchtower
   #   image: containrrr/watchtower:latest
